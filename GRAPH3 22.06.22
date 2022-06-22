@@ -1,0 +1,104 @@
+
+
+class GraphofCities {
+    public class City : IComparable<City>
+    {
+        public readonly String name;
+        public readonly Int32 id;
+        public readonly Double x;
+        public readonly Double y;
+        public City(String name, Int32 id, Double x, Double y){ this.name = name; this.id = id; this.x = x; this.y = y; }
+        public static Double finddist(City dep, City des)
+        { return Math.Sqrt((dep.x - des.x) * (dep.x - des.x) + (dep.y - des.y) * (dep.y - des.y)); }
+        public override String ToString() =>  ( name + " " + id.ToString() + " " + x.ToString() + " " + y.ToString());
+        public int CompareTo(City? other)
+        {
+            return this.name.CompareTo(other.name);
+        }
+    }
+    List<City> westblock = null;
+    Boolean[,] graph = null;
+    public void Show()
+    {
+
+        foreach (City c in westblock)
+        {
+            Console.WriteLine(c.ToString());
+        }
+        
+    }
+    public GraphofCities(List<City> a,Boolean[,] admatrix) { westblock = a; graph = admatrix; }
+    public  Double[] Shortestfromavoid(String departure, String destination, List<String> ostblock)
+    {
+        const Double INF = Double.PositiveInfinity;
+        Int32 n = westblock.Count
+        ,
+        m = ostblock.Count;
+        Int32 depI = -1, destI = -1;
+        for (int i = 0; i < n; ++i)
+        {
+            if (String.Compare(westblock[i].name, departure) == 0)
+            {
+                depI = i;
+            }
+            if (String.Compare(westblock[i].name, destination) == 0)
+            {
+                destI = i;
+            }
+        }
+        if (depI == -1 || destI == -1) return null;
+        if (depI == destI) return null;
+        //westblock is already sorted
+       
+        
+
+
+        List<int> safecities = new List<int>();
+       
+
+        var dist = new Double[n];
+        for (int i = 0; i < n; ++i)
+        {
+            dist[i] = INF;
+        }
+        dist[depI] = 0;
+        var marked = new Boolean[n];
+        foreach(var c in westblock)
+        {
+            foreach(var banned in ostblock)
+            {
+                if(String.Compare(c.name,banned)==0)
+                {
+                    marked[c.id] = true;
+                }
+            }
+        }
+        foreach (var m1 in marked)
+            Console.WriteLine(m1);
+        SortedSet<(Double, Int32)> next = new SortedSet<(Double, Int32)>();
+        next.Add((0, depI));
+        while (next.Count!=0)
+        {
+            var currentstation = next.Min;
+            var length = currentstation.Item1;
+            var index  = currentstation.Item2;
+            next.Remove(currentstation);
+            marked[index] = true;
+            foreach (var i in westblock)
+            {
+                var path = City.finddist(westblock[index], i);
+                if (graph[westblock[index].id, i.id ] && !marked[i.id] && path + dist[index] < dist[i.id])
+                {
+                    next.Remove((dist[i.id], i.id));
+                    next.Add((path + dist[index], i.id));
+                    dist[i.id] = path + dist[index];
+                }
+            }
+        }
+        return dist;
+    }
+}
+
+
+
+
